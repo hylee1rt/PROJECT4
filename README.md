@@ -90,5 +90,21 @@ class GAMsk(BaseEstimator, RegressorMixin):
         X = check_array(X)
         return self.pred_.predict(X).reshape(-1,1)
 ```
+Now we can define a k-fold function using our sklearn GAM model:
 
+```python
+def DoKFold(X,y,k):
+  PE = []
+  kf = KFold(n_splits=k,shuffle=True,random_state=1234)
+  for idxtrain, idxtest in kf.split(X):
+    X_train = X[idxtrain,:]
+    y_train = y[idxtrain]
+    X_test  = X[idxtest,:]
+    y_test  = y[idxtest]
+    model = GAMsk(ns=10)
+    model.fit(X_train, y_train)
+    yhat_test = model.predict(X_test)
+    PE.append(R2(y_test,yhat_test))
+  return np.mean(PE)
+```
 
