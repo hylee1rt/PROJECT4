@@ -32,7 +32,7 @@ The Regression Equation becomes:
 
 where *Y* is the dependent variable, *E(Y)* denotes the expected value, and *g(Y)* denotes the function that links the expected value to the predictor variables *x1,...,xp*, and the terms *s1(x1),...,sp(xp)* denote smooth, nonparametric functions.
 
-First, we will take a look at a single split of the data and fit it into our GAM model. We will need to install pygam and import the LinearGAM package.  
+First, we will take a look at a single split of the data and fit it into our GAM model. We will need to install pygam and import the LinearGAM package. We will use R-squared value as our metric for assessing the quality of our predictions. 
 
 ```python
 !pip install pygam
@@ -54,6 +54,8 @@ gam = LinearGAM(n_splines=6).gridsearch(X_train, y_train,objective='GCV')
 yhat_test = gam.predict(X_test)
 print(R2(y_test, yhat_test))
 ```
-
-
-
+```
+100% (11 of 11) |########################| Elapsed Time: 0:00:10 Time:  0:00:10
+0.33417590791145935
+```
+Here, we have a pretty weak model in terms of our coefficient of determination. Let us see if we can improve our R-squared value with k-fold cross validation. 
