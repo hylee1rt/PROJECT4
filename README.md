@@ -2,7 +2,7 @@ In many situations, the relationship between some covariate(s) X and y is not so
 
 
 ## Physicochemical Properties of Protein Tertiary Structure Data
-The dataset we will be using is from [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml/datasets/Physicochemical+Properties+of+Protein+Tertiary+Structure).
+The dataset we will be using is from [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml/datasets/Physicochemical+Properties+of+Protein+Tertiary+Structure). The input features will be columns F1 through F9, and the target variable will be the RMSD column. 
 
 |Column | Attribute| 
 |--------|-------------|
@@ -201,6 +201,6 @@ Here are the cross-validated results using 10 folds (k=10) for the two models we
 | Nadaraya-Watson               |      0.6087 | 0.6292          |    
  
  
-#Conclusion
+# Conclusion
 
 We can clearly see from our results that the Nadaraya-Watson model performed better for this dataset. Despite the overfitting, the R-squared value was significantly higher than the GAM model, and the root mean squared error was also much lower for the NW model. The residuals for the NW model had more of a normal distribution, meaning that the model was more effective in estimating the RMSD variable. Conclusively, we can say that the Nadaraya-Watson kernel density estimator model was overall more effective at predicting the relationship between RMSD values and the features within our data. 
