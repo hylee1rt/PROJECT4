@@ -60,7 +60,7 @@ print(R2(y_test, yhat_test))
 100% (11 of 11) |########################| Elapsed Time: 0:00:10 Time:  0:00:10
 0.33417590791145935
 ```
-Here, we have a pretty weak model in terms of our coefficient of determination. Let us see if we can improve our R-squared value with k-fold cross validation. In order to implement k-fold cross validation, we first create our own sklearn function. 
+Here, we have a pretty weak model in terms of our coefficient of determination. Let us see if we can improve or verify our R-squared value with k-fold cross validation. In order to implement k-fold cross validation, we first create our own sklearn function. 
 
 ```python
 from pygam import LinearGAM
@@ -101,10 +101,28 @@ def DoKFold(X,y,k):
     y_train = y[idxtrain]
     X_test  = X[idxtest,:]
     y_test  = y[idxtest]
-    model = GAMsk(ns=10)
+    model = GAMsk(ns=50)
     model.fit(X_train, y_train)
     yhat_test = model.predict(X_test)
     PE.append(R2(y_test,yhat_test))
   return np.mean(PE)
 ```
+```
+DoKFold(X,y,10)
+```
+```
+0.36723977496712423 
+```
+A little better!
+
+
+To understand our results further, we will plot the residuals from a single train and test split using the yellowbrick library. Perhaps from the plot we can see that the distribution of our residuals is not quite normal. It is skewed right, which explains the low R-quared value. 
+
+<img width="700" alt="download" src="https://user-images.githubusercontent.com/66886936/114251767-40f33680-9970-11eb-8648-ea466fe8b477.png">
+
+
+
+
+
+# Nadaraya Watson Kernel Weighted Regression 
 
