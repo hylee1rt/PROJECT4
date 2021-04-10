@@ -155,7 +155,8 @@ model = GridSearchCV(NadarayaWatson(), cv=5, param_grid=param_grid)
 model.fit(Xs_train,ys_train)
 model.best_params_
 ```
-```{'gamma': 32.22222222222222, 'kernel': 'rbf'}
+```python
+{'gamma': 32.22222222222222, 'kernel': 'rbf'}
 ```
 Using these parameters we will define a k-fold function:
 
@@ -182,9 +183,11 @@ def DoKFold(X,y,k):
   ```
   DoKFold(X,y,10)
   ```
-``` 
+```python
 0.6291443207235665
 ```
+
+
 Let's now look at the residuals for a single train and test split of the data. Clearly, the R-quared value for the training set is much higher and therefore our model is highly overfit. However, our testing R-squared value performed much better than the GAM model. We can also note that the distribution of the residuals looks more like a normal distribution, unlike the skewed distribution from the GAM model, which may explain our higher R-squared result. 
 
 <img width="700" alt="download" src="https://user-images.githubusercontent.com/66886936/114254669-c41b8900-997e-11eb-98c5-f0a4620b324d.png">
