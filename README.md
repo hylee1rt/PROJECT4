@@ -32,7 +32,7 @@ The Regression Equation becomes:
 
 where *Y* is the dependent variable, *E(Y)* denotes the expected value, and *g(Y)* denotes the function that links the expected value to the predictor variables *x1,...,xp*, and the terms *s1(x1),...,sp(xp)* denote smooth, nonparametric functions.
 
-We will need to install pygam and import the LinearGAM package, and we will examine the R-squared value as our metric for assessing the quality of our predictions. 
+We will need to install pygam and import the LinearGAM package, and we will examine the R-squared value and the RMSE as our metric for assessing the quality of our predictions. 
 
 ```python
 !pip install pygam
@@ -116,10 +116,9 @@ DoKFold(X,y,10)
 A little better!
 
 
-To understand our results further, we will plot the residuals from a single train and test split using the yellowbrick library. Perhaps from the plot we can see that the distribution of our residuals is not quite normal. It is skewed right, which explains the low R-quared value. 
+To understand our results further, we will plot the residuals from a single train and test split using the yellowbrick library. Perhaps from the plot we can see that the distribution of our residuals is not quite normal. It is skewed right, which explains the low R-quared value. Next, we will see how our kernel density estimator performs.
 
 <img width="700" alt="download" src="https://user-images.githubusercontent.com/66886936/114251767-40f33680-9970-11eb-8648-ea466fe8b477.png">
-
 
 
 
@@ -128,7 +127,74 @@ To understand our results further, we will plot the residuals from a single trai
 
 Kernel regression is a non-parametric alternative to least squares in which the predictor does not take a predetermined form. Kernel regression estimates the response by convolving the data with a kernel function to combine the influence of the individual data points. The Nadaraya-Watson regressor estimates the response y using a kernel weighted average of the individual datapoints *(xi,yi)*:
 
-![CodeCogsEqn (4)](https://user-images.githubusercontent.com/66886936/114253738-646eaf00-9979-11eb-87b1-f8b95b7307db.gif)
+![CodeCogsEqn (5)](https://user-images.githubusercontent.com/66886936/114253879-4a819c00-997a-11eb-88e9-d00be2ab5f26.gif)
 
-where *K(x,x')* is a kernel function.
+
+where *Kh* is a kernel function with a bandwith *h* and the denominator is a weighting term with sum 1. Common derivation is as follows:
+
+![CodeCogsEqn (7)](https://user-images.githubusercontent.com/66886936/114253949-b6640480-997a-11eb-9578-86ef823e6acf.gif)
+
+![CodeCogsEqn (8)](https://user-images.githubusercontent.com/66886936/114254007-017e1780-997b-11eb-8779-e1f8410a00cb.gif)
+
+![CodeCogsEqn (9)](https://user-images.githubusercontent.com/66886936/114254039-22466d00-997b-11eb-9553-e3f469400d78.gif)
+
+![CodeCogsEqn (11)](https://user-images.githubusercontent.com/66886936/114254078-5883ec80-997b-11eb-953c-e5f53689e980.gif)
+
+
+Because the implementation of this Nadaraya-Watson kernel density estimator lacks in optimization, the function requires a LOT of RAM space and causes the runtime to crash. Due to this limitation, we will have to determine the optimal gamma value first using GridSearchCV. 
+
+```python 
+X_train, X_test, y_train, y_test = tts(X,y,test_size=0.3,random_state=1234)
+Xs_train = scale.fit_transform(X_train)
+Xs_test = scale.transform(X_test)
+ys_train = scale.fit_transform(y_train)
+ys_test = scale.transform(y_test)
+
+param_grid=dict(kernel=["rbf"],gamma=np.linspace(30, 50, 10))
+model = GridSearchCV(NadarayaWatson(), cv=5, param_grid=param_grid)
+model.fit(Xs_train,ys_train)
+model.best_params_
+```
+{'gamma': 32.22222222222222, 'kernel': 'rbf'}
+
+Using these parameters we will define a k-fold function:
+
+```python
+def DoKFold(X,y,k):
+  scale = StandardScaler()
+  X = scale.fit_transform(X)
+  y = scale.fit_transform(y)
+  PE = []
+  kf = KFold(n_splits=k,shuffle=True,random_state=1234)
+  for idxtrain, idxtest in kf.split(X):
+    model = NadarayaWatson(kernel='rbf', gamma=32.2222)
+    X_train = X[idxtrain,:]
+    y_train = y[idxtrain]
+    X_test  = X[idxtest,:]
+    y_test  = y[idxtest]
+    model.fit(X_train, y_train)
+    yhat_test = model.predict(X_test)
+    PE.append(R2(y_test,yhat_test))
+  return np.mean(PE)
+  ```
+  ```
+  DoKFold(X,y,10)
+  ```
+  0.6291443207235665
+
+Let's now look at the residuals for a single train and test split of the data. Clearly, the R-quared value for the training set is much higher and therefore our model is highly overfit. However, our testing R-squared value performed much better than the GAM model. We can also note that the distribution of the residuals looks like a normal distribution, which may explain our higher R-squared result. 
+
+<img width="700" alt="download" src="https://user-images.githubusercontent.com/66886936/114254669-c41b8900-997e-11eb-98c5-f0a4620b324d.png">
+
+
+
+
+# Results
+
+| Model                          | RMSE      |  R-squared      |
+|--------------------------------|-----------|--------------------|
+| GAM                          |      4.9367 | 0.3672           |                     
+| Nadaraya-Watson               |      0.03 | 0.6292          |    
+ 
+
 
