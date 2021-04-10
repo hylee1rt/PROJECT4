@@ -162,8 +162,6 @@ Using these parameters we will define a k-fold function:
 ```python
 def DoKFold(X,y,k):
   scale = StandardScaler()
-  X = scale.fit_transform(X)
-  y = scale.fit_transform(y)
   PE = []
   kf = KFold(n_splits=k,shuffle=True,random_state=1234)
   for idxtrain, idxtest in kf.split(X):
@@ -172,9 +170,13 @@ def DoKFold(X,y,k):
     y_train = y[idxtrain]
     X_test  = X[idxtest,:]
     y_test  = y[idxtest]
-    model.fit(X_train, y_train)
-    yhat_test = model.predict(X_test)
-    PE.append(R2(y_test,yhat_test))
+    Xs_train = scale.fit_transform(X_train)
+    Xs_test = scale.transform(X_test)
+    ys_train = scale.fit_transform(y_train)
+    ys_test = scale.transform(y_test)
+    model.fit(Xs_train, ys_train)
+    yhat_test = model.predict(Xs_test)
+    PE.append(R2(ys_test,yhat_test))
   return np.mean(PE)
   ```
   ```
@@ -182,19 +184,23 @@ def DoKFold(X,y,k):
   ```
   0.6291443207235665
 
-Let's now look at the residuals for a single train and test split of the data. Clearly, the R-quared value for the training set is much higher and therefore our model is highly overfit. However, our testing R-squared value performed much better than the GAM model. We can also note that the distribution of the residuals looks like a normal distribution, which may explain our higher R-squared result. 
+Let's now look at the residuals for a single train and test split of the data. Clearly, the R-quared value for the training set is much higher and therefore our model is highly overfit. However, our testing R-squared value performed much better than the GAM model. We can also note that the distribution of the residuals looks more like a normal distribution, unlike the skewed distribution from the GAM model, which may explain our higher R-squared result. 
 
 <img width="700" alt="download" src="https://user-images.githubusercontent.com/66886936/114254669-c41b8900-997e-11eb-98c5-f0a4620b324d.png">
 
 
 
 
-# Results
+# Results 
+
+Here are the cross-validated results using 10 folds (k=10) for the two models we've covered:
 
 | Model                          | RMSE      |  R-squared      |
-|--------------------------------|-----------|--------------------|
+|--------------------------------|-----------|------------------|
 | GAM                          |      4.9367 | 0.3672           |                     
-| Nadaraya-Watson               |      0.03 | 0.6292          |    
+| Nadaraya-Watson               |      0.6087 | 0.6292          |    
  
+ 
+#Conclusion
 
-
+We can clearly see from our results that the Nadaraya-Watson model performed better for this dataset. Despite the overfitting, the R-squared value was significantly higher than the GAM model, and the root mean squared error was also much lower for the NW model. The residuals for the NW model had more of a normal distribution, meaning that the model was more effective in estimating the RMSD variable. Conclusively, we can say that the Nadaraya-Watson kernel density estimator model was overall more effective at predicting the relationship between RMSD values and the features within our data. 
