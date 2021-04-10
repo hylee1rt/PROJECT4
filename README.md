@@ -126,3 +126,9 @@ To understand our results further, we will plot the residuals from a single trai
 
 # Nadaraya Watson Kernel Weighted Regression 
 
+Kernel regression is a non-parametric alternative to least squares in which the predictor does not take a predetermined form. Kernel regression estimates the response by convolving the data with a kernel function to combine the influence of the individual data points. The Nadaraya-Watson regressor estimates the response y using a kernel weighted average of the individual datapoints *(xi,yi)*:
+
+![CodeCogsEqn (4)](https://user-images.githubusercontent.com/66886936/114253738-646eaf00-9979-11eb-87b1-f8b95b7307db.gif)
+
+where *K(x,x')* is a kernel function.
+
